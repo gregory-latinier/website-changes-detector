@@ -1,0 +1,19 @@
+{
+  "name": "root",
+  "private": true,
+  "npmClient": "yarn",
+  "workspaces": {
+    "packages": [
+      "packages/*"
+    ],
+    "nohoist": [
+      "**/**"
+    ]
+  },
+  "devDependencies": {
+    "lerna": "^3.20.2"
+  },
+  "scripts": {
+    "dev": "lerna run dev --parallel --stream"
+  }
+}
