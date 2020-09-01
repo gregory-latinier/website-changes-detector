@@ -11,6 +11,7 @@ export default {
       form: {
         _id: null,
         url: null,
+        title: null,
         frequency: 1,
         frequencyUnit: 60000,
         active: false
@@ -34,6 +35,7 @@ export default {
           this.form = {
             _id: null,
             url: null,
+            title: null,
             frequency: 1,
             frequencyUnit: 60000,
             active: false
@@ -65,6 +67,14 @@ export default {
 q-card
   .text-h6 Ajouter une url
   q-card-section
+    q-input(
+      ref="title"
+      v-model="form.title"
+      label="Titre"
+      :rules="[rules.required]"
+      hint="Message affiché dans l'alerte"
+      :lazy-rules="true"
+    )
     q-input(
       ref="url"
       v-model="form.url"

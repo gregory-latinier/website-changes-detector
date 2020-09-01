@@ -13,6 +13,7 @@ export default {
         rowsPerPage: 20
       },
       columns: [
+        { name: 'title', required: true, label: 'Titre', align: 'left', field: 'title', sortable: true },
         { name: 'url', required: true, label: 'URL', align: 'left', field: 'url', sortable: true },
         { name: 'lastAlert', required: true, label: 'Last Alert', align: 'left', field: 'lastAlert', sortable: true },
         { name: 'lastCheck', required: true, label: 'Last Check', align: 'left', field: 'lastCheck', sortable: true },
@@ -56,6 +57,7 @@ export default {
     onEdit (data) {
       this.editForm = {
         _id: data._id,
+        title: data.title,
         url: data.url,
         frequency: data.frequency,
         frequencyUnit: data.frequencyUnit,
@@ -90,6 +92,7 @@ q-page.q-pa-md
   )
     template(v-slot:body="props")
       q-tr(:props="props")
+        q-td(key="title" :props="props") {{ props.row.title }}
         q-td(key="url" :props="props")
           | {{ props.row.url }}
           q-btn(

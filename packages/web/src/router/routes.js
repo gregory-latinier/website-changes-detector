@@ -12,7 +12,8 @@ const routes = [
     component: () => import('layouts/AuthLayout.vue'),
     meta: { auth: true },
     children: [
-      { path: '/urls', component: () => import('pages/urls/urls-list.vue') }
+      { path: '/urls', component: () => import('pages/urls/urls-list.vue') },
+      { path: '/alerts', component: () => import('pages/alerts/alerts-list.vue') }
     ]
   },
   // Always leave this as last one,

@@ -3,6 +3,7 @@ import { Id, NullableId, Paginated, Params, ServiceMethods } from '@feathersjs/f
 import { NotImplemented } from '@feathersjs/errors';
 import { Application } from '../../declarations';
 import { IUrl } from '../../models/urls.model';
+import { IAlert } from '../../models/alerts.model';
 
 // @ts-ignore
 import puppeteer, { Browser } from 'puppeteer';
@@ -12,6 +13,9 @@ import { PNG } from 'pngjs';
 // @ts-ignore
 import pixelmatch from 'pixelmatch';
 
+import Twilio from 'twilio';
+import sgMail from '@sendgrid/mail';
+
 interface Data {}
 
 interface ServiceOptions {}
@@ -20,11 +24,17 @@ export class Monitoring implements ServiceMethods<Data> {
   app: Application;
   options: ServiceOptions;
   browser: Browser | null;
+  twilio: any;
+  sendGrid: any;
 
   constructor (options: ServiceOptions = {}, app: Application) {
     this.options = options;
     this.app = app;
     this.browser = null;
+    this.twilio = Twilio(this.app.get('twilio').account, this.app.get('twilio').token);
+    this.sendGrid = sgMail;
+    this.sendGrid.setApiKey(this.app.get('sendGrid').key);
+
     if(!fs.existsSync(this.app.get('screenshotPath'))) {
       fs.mkdirSync(this.app.get('screenshotPath'), { recursive: true });
     }
@@ -54,6 +64,28 @@ export class Monitoring implements ServiceMethods<Data> {
               await this.app.service('urls').patch(url._id, { lastAlert: Date.now() });
               fs.unlinkSync(`${this.app.get('screenshotPath')}/${url._id}.png`);
               fs.renameSync(`${this.app.get('screenshotPath')}/${url._id}-new.png`, `${this.app.get('screenshotPath')}/${url._id}.png`);
+
+              const alerts = await this.app.service('alerts').find({ query: { active: true } }) as Paginated<IAlert>;
+              if(alerts.data.length) {
+                for (const alert of alerts.data) {
+                  if(alert.type === 'sms') {
+                    await this.twilio.messages.create({
+                      from: this.app.get('twilio').number,
+                      to: alert.value,
+                      body: 'Alert test'
+                    });
+                  } else if(alert.type === 'email') {
+                    const msg = {
+                      to: alert.value,
+                      from: this.app.get('sendGrid').sender,
+                      subject: url.title,
+                      text: `Changement détecté sur ${url.url}`,
+                      html: `Changement détecté sur <a href="${url.url}">${url.url}</a>`,
+                    };
+                    await sgMail.send(msg);
+                  }
+                }
+              }
             }
           }
 

@@ -41,6 +41,14 @@ q-layout(view="lHh Lpr lFf")
     q-list
       q-item(
         clickable
+        to="/alerts"
+      )
+        q-item-section(avatar)
+          q-icon(name="fas fa-bell")
+        q-item-section
+          q-item-label Alerts
+      q-item(
+        clickable
         to="/urls"
       )
         q-item-section(avatar)

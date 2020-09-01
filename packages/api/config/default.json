@@ -31,5 +31,14 @@
   "APIInternalKey": "INTERNAL_API_KEY",
   "screenshotPath": "SCREENSHOT_PATH",
   "deployUrl": "DEPLOY_URL",
-  "mongodb": "MONGODB_URI"
+  "mongodb": "MONGODB_URI",
+  "twilio": {
+    "account": "TWILIO_ACCOUNT",
+    "token": "TWILIO_TOKEN",
+    "number": "TWILIO_NUMBER"
+  },
+  "sendGrid": {
+    "key": "SENDGRID_KEY",
+    "sender": "SENDGRID_SENDER"
+  }
 }

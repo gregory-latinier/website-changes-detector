@@ -47,6 +47,7 @@
     "@feathersjs/express": "^4.5.4",
     "@feathersjs/feathers": "^4.5.3",
     "@feathersjs/transport-commons": "^4.5.8",
+    "@sendgrid/mail": "^7.2.4",
     "@types/node-fetch": "^2.5.7",
     "@types/pixelmatch": "^5.2.1",
     "@types/pngjs": "^3.4.2",
@@ -63,6 +64,7 @@
     "pngjs": "^5.0.0",
     "puppeteer": "^5.2.1",
     "serve-favicon": "^2.5.0",
+    "twilio": "^3.49.0",
     "winston": "^3.0.0"
   },
   "devDependencies": {
