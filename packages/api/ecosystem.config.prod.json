@@ -1,0 +1,12 @@
+{
+  "apps" : [
+    {
+      "name": "website-changes-detector-api-production",
+      "script": "./lib/index.js",
+      "env": {
+        "PORT": 5556,
+        "NODE_ENV": "production"
+      }
+    }
+  ]
+}
