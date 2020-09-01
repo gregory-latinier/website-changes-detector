@@ -3,8 +3,8 @@
   "port": 5556,
   "public": "../public/",
   "paginate": {
-    "default": 10,
-    "max": 50
+    "default": 100,
+    "max": 100
   },
   "authentication": {
     "entity": "user",
@@ -28,5 +28,8 @@
       "passwordField": "password"
     }
   },
+  "APIInternalKey": "INTERNAL_API_KEY",
+  "screenshotPath": "SCREENSHOT_PATH",
+  "deployUrl": "DEPLOY_URL",
   "mongodb": "MONGODB_URI"
 }

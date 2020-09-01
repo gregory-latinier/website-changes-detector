@@ -5,13 +5,23 @@
 import { Application } from '../declarations';
 import { Model, Mongoose } from 'mongoose';
 
+export interface IUrl {
+  _id: string;
+  url: string;
+  lastAlert: Date;
+  lastCheck: Date;
+  frequency: number;
+  frequencyUnit: number;
+  active: boolean;
+}
+
 export default function (app: Application): Model<any> {
   const modelName = 'urls';
   const mongooseClient: Mongoose = app.get('mongooseClient');
   const { Schema } = mongooseClient;
   const schema = new Schema({
     url: { type: String, required: true },
-    lastAlert: { type: Date, required: true },
+    lastAlert: { type: Date },
     lastCheck: { type: Date },
     frequency: { type: Number, required: true },
     frequencyUnit: { type: Number, required: true },

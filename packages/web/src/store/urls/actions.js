@@ -4,7 +4,7 @@ export const saveUrl = async function (context, url) {
 }
 
 export const editUrl = async function (context, url) {
-  return this.$api.service('urls').update(url._id, url)
+  return this.$api.service('urls').patch(url._id, url)
 }
 
 export const findUrls = async function () {

@@ -3,6 +3,8 @@ dotenv.config();
 import logger from './logger';
 import app from './app';
 
+import monitoring from './cron/monitoring-request';
+
 const port = app.get('port');
 const server = app.listen(port);
 
@@ -13,3 +15,10 @@ process.on('unhandledRejection', (reason, p) =>
 server.on('listening', () =>
   logger.info('Feathers application started on http://%s:%d', app.get('host'), port)
 );
+
+const cron = async () => {
+  await monitoring();
+  setTimeout(cron, 1000);
+};
+
+cron();
