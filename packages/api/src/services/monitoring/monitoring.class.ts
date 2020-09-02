@@ -72,17 +72,23 @@ export class Monitoring implements ServiceMethods<Data> {
                     await this.twilio.messages.create({
                       from: this.app.get('twilio').number,
                       to: alert.value,
-                      body: 'Alert test'
+                      body: `Changement détecté sur ${url.title}: ${url.url}`
                     });
                   } else if(alert.type === 'email') {
                     const msg = {
                       to: alert.value,
                       from: this.app.get('sendGrid').sender,
                       subject: url.title,
-                      text: `Changement détecté sur ${url.url}`,
-                      html: `Changement détecté sur <a href="${url.url}">${url.url}</a>`,
+                      text: `Changement détecté sur ${url.title}: ${url.url}`,
+                      html: `Changement détecté sur <a href="${url.url}">${url.title}</a>`,
                     };
                     await sgMail.send(msg);
+                  } else if(alert.type === 'whatsapp') {
+                    await this.twilio.messages.create({
+                      from: this.app.get('twilio').whatsapp,
+                      to: alert.value,
+                      body: `Changement détecté sur ${url.title}: ${url.url}`
+                    });
                   }
                 }
               }

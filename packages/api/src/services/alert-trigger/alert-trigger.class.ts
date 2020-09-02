@@ -49,6 +49,13 @@ export class AlertTrigger implements ServiceMethods<Data> {
       } catch (e) {
         console.log(e);
       }
+    } else if(alert.type === 'whatsapp') {
+      const result = await this.twilio.messages.create({
+        from: this.app.get('twilio').whatsapp,
+        to: alert.value,
+        body: 'Alert test'
+      });
+      console.log(result);
     }
     return {
       success: true
