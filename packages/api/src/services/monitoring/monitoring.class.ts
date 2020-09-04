@@ -44,7 +44,7 @@ export class Monitoring implements ServiceMethods<Data> {
   async find (params?: Params): Promise<Data[] | Paginated<Data>> {
     try {
       if(!this.browser) {
-        this.browser = await puppeteer.launch();
+        this.browser = await puppeteer.launch({args: ['--no-sandbox']});
       }
       const urls = await this.app.service('urls').find({ query: { active: true } }) as Paginated<IUrl>;
       if(urls.data.length) {
