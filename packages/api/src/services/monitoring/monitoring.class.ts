@@ -56,6 +56,10 @@ export class Monitoring implements ServiceMethods<Data> {
             await page.goto(url.url, {
               waitUntil: ['networkidle0', 'networkidle2']
             });
+            await page.evaluate(() => {
+              window.scrollBy(0, window.innerHeight);
+            });
+            await page.waitFor(5000);
             await page.screenshot({
               path: `${this.app.get('screenshotPath')}/${url._id}-new.png`,
               fullPage: true
