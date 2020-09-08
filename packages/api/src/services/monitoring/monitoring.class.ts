@@ -53,8 +53,13 @@ export class Monitoring implements ServiceMethods<Data> {
           if(!url.lastCheck || url.lastCheck.getTime() <= Date.now() - url.frequency * url.frequencyUnit) {
             await this.app.service('urls').patch(url._id, { lastCheck: Date.now() });
             const page = await this.browser.newPage();
-            await page.goto(url.url);
-            await page.screenshot({path: `${this.app.get('screenshotPath')}/${url._id}-new.png`, fullPage: true });
+            await page.goto(url.url, {
+              waitUntil: 'networkidle0'
+            });
+            await page.screenshot({
+              path: `${this.app.get('screenshotPath')}/${url._id}-new.png`,
+              fullPage: true
+            });
             if(!fs.existsSync(`${this.app.get('screenshotPath')}/${url._id}.png`)) {
               fs.renameSync(`${this.app.get('screenshotPath')}/${url._id}-new.png`, `${this.app.get('screenshotPath')}/${url._id}.png`);
             } else {
