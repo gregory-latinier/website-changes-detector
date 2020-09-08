@@ -54,7 +54,7 @@ export class Monitoring implements ServiceMethods<Data> {
             await this.app.service('urls').patch(url._id, { lastCheck: Date.now() });
             const page = await this.browser.newPage();
             await page.goto(url.url, {
-              waitUntil: 'networkidle0'
+              waitUntil: ['networkidle0', 'networkidle2']
             });
             await page.screenshot({
               path: `${this.app.get('screenshotPath')}/${url._id}-new.png`,
