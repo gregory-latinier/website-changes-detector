@@ -54,13 +54,13 @@ export class Monitoring implements ServiceMethods<Data> {
             await this.app.service('urls').patch(url._id, { lastCheck: Date.now() });
             const page = await this.browser.newPage();
             await page.goto(url.url);
-            await page.screenshot({path: `${this.app.get('screenshotPath')}/${url._id}-new.png`});
+            await page.screenshot({path: `${this.app.get('screenshotPath')}/${url._id}-new.png`, fullPage: true });
             if(!fs.existsSync(`${this.app.get('screenshotPath')}/${url._id}.png`)) {
               fs.renameSync(`${this.app.get('screenshotPath')}/${url._id}-new.png`, `${this.app.get('screenshotPath')}/${url._id}.png`);
             } else {
               const newImg = PNG.sync.read(fs.readFileSync(`${this.app.get('screenshotPath')}/${url._id}-new.png`));
               const oldImg = PNG.sync.read(fs.readFileSync(`${this.app.get('screenshotPath')}/${url._id}.png`));
-              const diff = pixelmatch(newImg.data, oldImg.data, null, 800, 600, { threshold: 0.1 });
+              const diff = pixelmatch(newImg.data, oldImg.data, null, newImg.width, newImg.height, { threshold: 0.1 });
               if(diff > 0) {
                 await this.app.service('urls').patch(url._id, { lastAlert: Date.now() });
                 fs.unlinkSync(`${this.app.get('screenshotPath')}/${url._id}.png`);
