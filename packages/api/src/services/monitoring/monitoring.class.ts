@@ -59,7 +59,7 @@ export class Monitoring implements ServiceMethods<Data> {
               if(url.sourceCode) {
                 diff = jsLevenshtein(url.sourceCode, sourceCode);
               }
-              if(diff || !url.sourceCode) {
+              if(!url.sourceCode) {
                 await this.app.service('urls').patch(url._id, { sourceCode });
               }
             }
@@ -70,7 +70,7 @@ export class Monitoring implements ServiceMethods<Data> {
               });
             }
             if(diff > 100) {
-              await this.app.service('urls').patch(url._id, { lastAlert: Date.now() });
+              await this.app.service('urls').patch(url._id, { lastAlert: Date.now(), sourceCode });
               fs.unlinkSync(`${this.app.get('screenshotPath')}/${url._id}.png`);
               await page.screenshot({
                 path: `${this.app.get('screenshotPath')}/${url._id}.png`,
