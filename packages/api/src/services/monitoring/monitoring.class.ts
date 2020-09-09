@@ -46,10 +46,15 @@ export class Monitoring implements ServiceMethods<Data> {
       }
       const urls = await this.app.service('urls').find({ query: { active: true } }) as Paginated<IUrl>;
       if(urls.data.length) {
+        // update the last check first
+        for(const url of urls.data) {
+          if(!url.lastCheck || url.lastCheck.getTime() <= Date.now() - url.frequency * url.frequencyUnit) {
+            await this.app.service('urls').patch(url._id, { lastCheck: Date.now() });
+          }
+        }
         for(const url of urls.data) {
           // The Url can be check
           if(!url.lastCheck || url.lastCheck.getTime() <= Date.now() - url.frequency * url.frequencyUnit) {
-            await this.app.service('urls').patch(url._id, { lastCheck: Date.now() });
             const page = await this.browser.newPage();
             const response = await page.goto(url.url);
             let sourceCode = '';
