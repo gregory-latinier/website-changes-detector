@@ -4,14 +4,12 @@ import { NotImplemented } from '@feathersjs/errors';
 import { Application } from '../../declarations';
 import { IUrl } from '../../models/urls.model';
 import { IAlert } from '../../models/alerts.model';
+// @ts-ignore
+import jsLevenshtein from 'js-levenshtein';
 
 // @ts-ignore
 import puppeteer, { Browser } from 'puppeteer';
 import fs from 'fs';
-// @ts-ignore
-import { PNG } from 'pngjs';
-// @ts-ignore
-import pixelmatch from 'pixelmatch';
 
 import Twilio from 'twilio';
 import sgMail from '@sendgrid/mail';
@@ -53,53 +51,55 @@ export class Monitoring implements ServiceMethods<Data> {
           if(!url.lastCheck || url.lastCheck.getTime() <= Date.now() - url.frequency * url.frequencyUnit) {
             await this.app.service('urls').patch(url._id, { lastCheck: Date.now() });
             const page = await this.browser.newPage();
-            await page.goto(url.url, {
-              waitUntil: ['networkidle0', 'networkidle2']
-            });
-            await page.evaluate(() => {
-              window.scrollBy(0, window.innerHeight);
-            });
-            await page.waitFor(5000);
-            await page.screenshot({
-              path: `${this.app.get('screenshotPath')}/${url._id}-new.png`,
-              fullPage: true
-            });
+            const response = await page.goto(url.url);
+            let sourceCode = '';
+            let diff = 0;
+            if(response) {
+              sourceCode = await response.text();
+              if(url.sourceCode) {
+                diff = jsLevenshtein(url.sourceCode, sourceCode);
+              }
+              if(diff || !url.sourceCode) {
+                await this.app.service('urls').patch(url._id, { sourceCode });
+              }
+            }
             if(!fs.existsSync(`${this.app.get('screenshotPath')}/${url._id}.png`)) {
-              fs.renameSync(`${this.app.get('screenshotPath')}/${url._id}-new.png`, `${this.app.get('screenshotPath')}/${url._id}.png`);
-            } else {
-              const newImg = PNG.sync.read(fs.readFileSync(`${this.app.get('screenshotPath')}/${url._id}-new.png`));
-              const oldImg = PNG.sync.read(fs.readFileSync(`${this.app.get('screenshotPath')}/${url._id}.png`));
-              const diff = pixelmatch(newImg.data, oldImg.data, null, newImg.width, newImg.height, { threshold: 0.1 });
-              if(diff > 0) {
-                await this.app.service('urls').patch(url._id, { lastAlert: Date.now() });
-                fs.unlinkSync(`${this.app.get('screenshotPath')}/${url._id}.png`);
-                fs.renameSync(`${this.app.get('screenshotPath')}/${url._id}-new.png`, `${this.app.get('screenshotPath')}/${url._id}.png`);
-
-                const alerts = await this.app.service('alerts').find({ query: { active: true } }) as Paginated<IAlert>;
-                if(alerts.data.length) {
-                  for (const alert of alerts.data) {
-                    if(alert.type === 'sms') {
-                      await this.twilio.messages.create({
-                        from: this.app.get('twilio').number,
-                        to: alert.value,
-                        body: `Changement détecté sur ${url.title}: ${url.url}`
-                      });
-                    } else if(alert.type === 'email') {
-                      const msg = {
-                        to: alert.value,
-                        from: this.app.get('sendGrid').sender,
-                        subject: url.title,
-                        text: `Changement détecté sur ${url.title}: ${url.url}`,
-                        html: `Changement détecté sur <a href="${url.url}">${url.title}</a>`,
-                      };
-                      await sgMail.send(msg);
-                    } else if(alert.type === 'whatsapp') {
-                      await this.twilio.messages.create({
-                        from: this.app.get('twilio').whatsapp,
-                        to: alert.value,
-                        body: `Changement détecté sur ${url.title}: ${url.url}`
-                      });
-                    }
+              await page.screenshot({
+                path: `${this.app.get('screenshotPath')}/${url._id}.png`,
+                fullPage: true
+              });
+            }
+            if(diff > 100) {
+              await this.app.service('urls').patch(url._id, { lastAlert: Date.now() });
+              fs.unlinkSync(`${this.app.get('screenshotPath')}/${url._id}.png`);
+              await page.screenshot({
+                path: `${this.app.get('screenshotPath')}/${url._id}.png`,
+                fullPage: true
+              });
+              const alerts = await this.app.service('alerts').find({ query: { active: true } }) as Paginated<IAlert>;
+              if(alerts.data.length) {
+                for (const alert of alerts.data) {
+                  if(alert.type === 'sms') {
+                    await this.twilio.messages.create({
+                      from: this.app.get('twilio').number,
+                      to: alert.value,
+                      body: `Changement détecté sur ${url.title}: ${url.url}`
+                    });
+                  } else if(alert.type === 'email') {
+                    const msg = {
+                      to: alert.value,
+                      from: this.app.get('sendGrid').sender,
+                      subject: url.title,
+                      text: `Changement détecté sur ${url.title}: ${url.url}`,
+                      html: `Changement détecté sur <a href="${url.url}">${url.title}</a>`,
+                    };
+                    await sgMail.send(msg);
+                  } else if(alert.type === 'whatsapp') {
+                    await this.twilio.messages.create({
+                      from: this.app.get('twilio').whatsapp,
+                      to: alert.value,
+                      body: `Changement détecté sur ${url.title}: ${url.url}`
+                    });
                   }
                 }
               }

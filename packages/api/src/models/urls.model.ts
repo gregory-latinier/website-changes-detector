@@ -9,6 +9,7 @@ export interface IUrl {
   _id: string;
   url: string;
   title: string;
+  sourceCode: string;
   lastAlert: Date;
   lastCheck: Date;
   frequency: number;
@@ -22,6 +23,7 @@ export default function (app: Application): Model<any> {
   const { Schema } = mongooseClient;
   const schema = new Schema({
     url: { type: String, required: true },
+    sourceCode: { type: String },
     title: { type: String, required: true },
     lastAlert: { type: Date },
     lastCheck: { type: Date },
