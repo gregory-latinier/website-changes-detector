@@ -68,7 +68,6 @@ export class Monitoring implements ServiceMethods<Data> {
       const urls = await this.app.service('urls').find({ query: { active: true } }) as Paginated<IUrl>;
       if(urls.data.length) {
         for await(const url of urls.data) {
-          if(url.title !== 'Accueil') continue;
           // The Url can be check
           if(!url.lastCheck || url.lastCheck.getTime() <= Date.now() - url.frequency * url.frequencyUnit) {
             await this.app.service('urls').patch(url._id, { lastCheck: Date.now() });
