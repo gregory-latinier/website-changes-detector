@@ -92,7 +92,12 @@ export class Monitoring implements ServiceMethods<Data> {
             } else {
               const newImg = PNG.sync.read(fs.readFileSync(`${this.app.get('screenshotPath')}/${url._id}-new.png`));
               const oldImg = PNG.sync.read(fs.readFileSync(`${this.app.get('screenshotPath')}/${url._id}.png`));
-              const diff = pixelmatch(newImg.data, oldImg.data, null, newImg.width, newImg.height, { threshold: 0.1 });
+              let diff = 0;
+              try {
+                diff = pixelmatch(newImg.data, oldImg.data, null, newImg.width, newImg.height, { threshold: 0.1 });
+              } catch (e) {
+                diff = 100;
+              }
               if(diff > 0) {
                 await this.app.service('urls').patch(url._id, { lastAlert: Date.now() });
                 fs.unlinkSync(`${this.app.get('screenshotPath')}/${url._id}.png`);
