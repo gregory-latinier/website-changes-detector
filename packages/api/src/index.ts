@@ -16,9 +16,4 @@ server.on('listening', () =>
   logger.info('Feathers application started on http://%s:%d', app.get('host'), port)
 );
 
-const cron = async () => {
-  await monitoring();
-  setTimeout(cron, 1000);
-};
-
-cron();
+monitoring();
