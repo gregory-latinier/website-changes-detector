@@ -100,6 +100,14 @@ export class Monitoring implements ServiceMethods<Data> {
               }
               if(diff > 0) {
                 await this.app.service('urls').patch(url._id, { lastAlert: Date.now() });
+                if(fs.existsSync(`${this.app.get('screenshotPath')}/${url._id}-comp1.png`)) {
+                  fs.unlinkSync(`${this.app.get('screenshotPath')}/${url._id}-comp1.png`);
+                }
+                if(fs.existsSync(`${this.app.get('screenshotPath')}/${url._id}-comp2.png`)) {
+                  fs.unlinkSync(`${this.app.get('screenshotPath')}/${url._id}-comp2.png`);
+                }
+                fs.copyFileSync(`${this.app.get('screenshotPath')}/${url._id}-new.png`, `${this.app.get('screenshotPath')}/${url._id}-comp1.png`);
+                fs.copyFileSync(`${this.app.get('screenshotPath')}/${url._id}.png`, `${this.app.get('screenshotPath')}/${url._id}-comp2.png`);
                 fs.unlinkSync(`${this.app.get('screenshotPath')}/${url._id}.png`);
                 fs.renameSync(`${this.app.get('screenshotPath')}/${url._id}-new.png`, `${this.app.get('screenshotPath')}/${url._id}.png`);
 
@@ -118,7 +126,7 @@ export class Monitoring implements ServiceMethods<Data> {
                         from: this.app.get('sendGrid').sender,
                         subject: url.title,
                         text: `Changement détecté sur ${url.title}: ${url.url}`,
-                        html: `Changement détecté sur <a href="${url.url}">${url.title}</a>`,
+                        html: `Changement détecté sur <a href="${url.url}">${url.title}</a><br /> Base 1<br /><img src="http://wcd.mentalhackers.org/screenshots/${url._id}-comp1.png"/><br /> Base 2<br /><img src="http://wcd.mentalhackers.org/screenshots/${url._id}-comp2.png"/>`,
                       };
                       await sgMail.send(msg);
                     } else if(alert.type === 'whatsapp') {
