@@ -99,6 +99,14 @@ export class Monitoring implements ServiceMethods<Data> {
                 diff = 100;
               }
               if(diff > 0) {
+                // Compare with cloudflare
+                const cloudflareRef = PNG.sync.read(fs.readFileSync(`${this.app.get('screenshotPath')}/../cloudflare.png`));
+                if(newImg.width === cloudflareRef.width && newImg.height === cloudflareRef.height) {
+                  diff = pixelmatch(newImg.data, cloudflareRef.data, null, newImg.width, newImg.height, { threshold: 0.1 });
+                  if(diff === 0) {
+                    return [];
+                  }
+                }
                 await this.app.service('urls').patch(url._id, { lastAlert: Date.now() });
                 if(fs.existsSync(`${this.app.get('screenshotPath')}/${url._id}-comp1.png`)) {
                   fs.unlinkSync(`${this.app.get('screenshotPath')}/${url._id}-comp1.png`);
